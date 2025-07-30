@@ -20,6 +20,13 @@ export const useAutoSave = (sessionId?: string) => {
     if (dataString === lastSavedRef.current) return;
     
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No authenticated user');
+        return;
+      }
+
       if (sessionId) {
         // Update existing session
         const { error } = await supabase
@@ -37,6 +44,7 @@ export const useAutoSave = (sessionId?: string) => {
           .from('sessions')
           .insert({
             ...data,
+            user_id: user.id,
             status: 'draft',
           })
           .select()

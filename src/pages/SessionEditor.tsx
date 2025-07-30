@@ -53,7 +53,7 @@ const SessionEditor = () => {
       setTitle(data.title);
       setTagsInput(data.tags?.join(', ') || '');
       setJsonFileUrl(data.json_file_url || '');
-      setStatus(data.status);
+      setStatus(data.status as 'draft' | 'published');
     }
   };
 
@@ -106,6 +106,18 @@ const SessionEditor = () => {
     const tags = tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag);
 
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to publish sessions",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
       if (id) {
         // Update existing session
         const { error } = await supabase
@@ -129,6 +141,7 @@ const SessionEditor = () => {
             tags,
             json_file_url: jsonFileUrl.trim(),
             status: 'published',
+            user_id: user.id,
           });
 
         if (error) throw error;

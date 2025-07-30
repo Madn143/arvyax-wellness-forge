@@ -35,7 +35,13 @@ export const useSessions = () => {
       return;
     }
 
-    setSessions(data || []);
+    // Type cast the data to ensure status is properly typed
+    const typedData = (data || []).map(session => ({
+      ...session,
+      status: session.status as 'draft' | 'published'
+    }));
+
+    setSessions(typedData);
     setLoading(false);
   };
 
@@ -55,7 +61,13 @@ export const useSessions = () => {
       return;
     }
 
-    setSessions(data || []);
+    // Type cast the data to ensure status is properly typed
+    const typedData = (data || []).map(session => ({
+      ...session,
+      status: session.status as 'draft' | 'published'
+    }));
+
+    setSessions(typedData);
     setLoading(false);
   };
 
