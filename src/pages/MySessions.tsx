@@ -29,7 +29,10 @@ const MySessions = () => {
   if (loading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold">My Sessions</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">My Sessions</h1>
+          <Skeleton className="h-10 w-32" />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(4)].map((_, i) => (
             <Skeleton key={i} className="h-48" />
@@ -42,7 +45,12 @@ const MySessions = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">My Sessions</h1>
+        <div>
+          <h1 className="text-3xl font-bold">My Sessions</h1>
+          <p className="text-muted-foreground mt-2">
+            Manage and organize your wellness sessions
+          </p>
+        </div>
         <Button onClick={() => navigate('/editor')}>
           <Plus className="h-4 w-4 mr-1" />
           New Session
@@ -74,6 +82,7 @@ const MySessions = () => {
                     session={session} 
                     onEdit={handleEdit}
                     onView={handleView}
+                    showActions={true}
                   />
                 ))}
               </div>
@@ -90,6 +99,7 @@ const MySessions = () => {
                     session={session} 
                     onEdit={handleEdit}
                     onView={handleView}
+                    showActions={true}
                   />
                 ))}
               </div>

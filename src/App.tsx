@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './components/ThemeProvider';
@@ -10,6 +11,8 @@ import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import MySessions from './pages/MySessions';
 import SessionEditor from './pages/SessionEditor';
+import SessionViewer from './pages/SessionViewer';
+import Settings from './pages/Settings';
 import ResetPassword from './pages/ResetPassword';
 import NotFound from './pages/NotFound';
 
@@ -98,6 +101,22 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <SessionEditor />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/session/:id" 
+            element={
+              <ProtectedRoute>
+                <SessionViewer />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/settings" 
+            element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             } 
           />
