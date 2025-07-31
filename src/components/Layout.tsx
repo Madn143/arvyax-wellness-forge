@@ -20,11 +20,32 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, signOut, sessionLoading } = useAuth();
+  const { user, signOut, sessionLoading, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  if (!user) return <>{children}</>;
+  // Show loading while checking authentication status
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-background/90">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is not authenticated and not on auth page, redirect to auth
+  if (!user && location.pathname !== '/auth') {
+    navigate('/auth');
+    return null;
+  }
+
+  // If user is not authenticated, show children (auth page)
+  if (!user) {
+    return <>{children}</>;
+  }
 
   const getUserInitials = (email: string) => {
     return email.split('@')[0].substring(0, 2).toUpperCase();
@@ -34,6 +55,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     await signOut();
     navigate('/auth');
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/90">
       {/* Glassmorphism header */}
