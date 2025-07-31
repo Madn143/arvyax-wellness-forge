@@ -1,27 +1,60 @@
-
 import { useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [sessionLoading, setSessionLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Get initial session
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+    // Handle OAuth redirect on mount
+    const handleOAuthRedirect = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('OAuth redirect error:', error);
+        toast({
+          title: "Authentication Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+      
+      if (data.session) {
+        setUser(data.session.user);
+        // Clean up URL parameters after successful OAuth
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('access_token') || url.searchParams.has('refresh_token')) {
+          window.history.replaceState({}, document.title, url.pathname);
+          navigate('/', { replace: true });
+        }
+      }
+      
       setLoading(false);
     };
 
-    getSession();
+    // Check if this is an OAuth redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('access_token') || urlParams.has('refresh_token')) {
+      handleOAuthRedirect();
+    } else {
+      // Normal session check
+      const getSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+        setLoading(false);
+      };
+      getSession();
+    }
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id);
         setUser(session?.user ?? null);
         setLoading(false);
         
@@ -30,11 +63,14 @@ export const useAuth = () => {
             title: "Welcome!",
             description: "Successfully signed in to Arvyax Wellness Sessions",
           });
+          // Redirect to dashboard after successful sign in
+          navigate('/', { replace: true });
         } else if (event === 'SIGNED_OUT') {
           toast({
             title: "Goodbye!",
             description: "Successfully signed out",
           });
+          navigate('/auth', { replace: true });
         } else if (event === 'PASSWORD_RECOVERY') {
           toast({
             title: "Password Reset",
@@ -45,7 +81,7 @@ export const useAuth = () => {
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const signUp = async (email: string, password: string, rememberMe: boolean = false) => {
     setSessionLoading(true);
@@ -132,7 +168,7 @@ export const useAuth = () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${window.location.origin}/auth`,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
@@ -193,6 +229,7 @@ export const useAuth = () => {
       description: "Your password has been successfully updated",
     });
   };
+
   return {
     user,
     loading,
