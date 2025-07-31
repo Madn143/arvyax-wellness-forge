@@ -1,22 +1,39 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { LogOut, Home, Plus, User } from 'lucide-react';
+import { LogOut, Home, Plus, User, Settings, Bell } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ThemeToggle } from './ThemeToggle';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, sessionLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   if (!user) return <>{children}</>;
 
+  const getUserInitials = (email: string) => {
+    return email.split('@')[0].substring(0, 2).toUpperCase();
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/90">
       {/* Glassmorphism header */}
@@ -68,24 +85,72 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* Right side - User info and controls */}
             <div className="flex items-center space-x-3">
-              <div className="hidden sm:flex items-center space-x-3">
-                <div className="text-right">
-                  <span className="text-sm font-medium text-foreground block">
-                    Welcome back
-                  </span>
-                  <span className="text-xs text-muted-foreground truncate max-w-32">
-                    {user.email}
-                  </span>
-                </div>
-              </div>
+              {/* Notifications */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative backdrop-blur-md bg-background/50 hover:bg-background/80 border border-border/50 transition-all duration-200"
+              >
+                <Bell className="h-4 w-4" />
+                <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full"></span>
+              </Button>
               
               <ThemeToggle />
               
+              {/* User Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full backdrop-blur-md bg-background/50 hover:bg-background/80 border border-border/50 transition-all duration-200"
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ''} />
+                      <AvatarFallback className="text-xs">
+                        {getUserInitials(user.email || 'U')}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 backdrop-blur-md bg-background/95 border border-border/50" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {user.user_metadata?.full_name || 'User'}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={handleSignOut}
+                    disabled={sessionLoading}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              {/* Mobile logout button */}
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={signOut}
-                className="backdrop-blur-sm bg-background/50 hover:bg-destructive/10 hover:text-destructive border-border/50 transition-all duration-200"
+                onClick={handleSignOut}
+                disabled={sessionLoading}
+                className="sm:hidden backdrop-blur-sm bg-background/50 hover:bg-destructive/10 hover:text-destructive border-border/50 transition-all duration-200"
               >
                 <LogOut className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Logout</span>

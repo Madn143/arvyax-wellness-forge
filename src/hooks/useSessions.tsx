@@ -19,6 +19,7 @@ export const useSessions = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchPublicSessions = async () => {
+    setLoading(true);
     const { data, error } = await supabase
       .from('sessions')
       .select('*')
@@ -46,6 +47,7 @@ export const useSessions = () => {
   };
 
   const fetchMySessions = async () => {
+    setLoading(true);
     const { data, error } = await supabase
       .from('sessions')
       .select('*')
@@ -71,10 +73,62 @@ export const useSessions = () => {
     setLoading(false);
   };
 
+  const deleteSession = async (sessionId: string) => {
+    const { error } = await supabase
+      .from('sessions')
+      .delete()
+      .eq('id', sessionId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete session",
+        variant: "destructive",
+      });
+      throw error;
+    }
+
+    toast({
+      title: "Success",
+      description: "Session deleted successfully",
+    });
+
+    // Refresh sessions
+    fetchMySessions();
+  };
+
+  const toggleSessionStatus = async (sessionId: string, newStatus: 'draft' | 'published') => {
+    const { error } = await supabase
+      .from('sessions')
+      .update({ 
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', sessionId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: `Failed to ${newStatus === 'published' ? 'publish' : 'unpublish'} session`,
+        variant: "destructive",
+      });
+      throw error;
+    }
+
+    toast({
+      title: "Success",
+      description: `Session ${newStatus === 'published' ? 'published' : 'unpublished'} successfully`,
+    });
+
+    // Refresh sessions
+    fetchMySessions();
+  };
   return {
     sessions,
     loading,
     fetchPublicSessions,
     fetchMySessions,
+    deleteSession,
+    toggleSessionStatus,
   };
 };

@@ -10,6 +10,7 @@ import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import MySessions from './pages/MySessions';
 import SessionEditor from './pages/SessionEditor';
+import ResetPassword from './pages/ResetPassword';
 import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ function App() {
               <Route path="/my-sessions" element={<MySessions />} />
               <Route path="/editor" element={<SessionEditor />} />
               <Route path="/editor/:id" element={<SessionEditor />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
