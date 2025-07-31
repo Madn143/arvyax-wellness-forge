@@ -15,6 +15,14 @@ const MySessions = () => {
     fetchMySessions();
   }, []);
 
+  const handleEdit = (sessionId: string) => {
+    navigate(`/editor/${sessionId}`);
+  };
+
+  const handleView = (sessionId: string) => {
+    navigate(`/session/${sessionId}`);
+  };
+
   const draftSessions = sessions.filter(s => s.status === 'draft');
   const publishedSessions = sessions.filter(s => s.status === 'published');
 
@@ -61,7 +69,12 @@ const MySessions = () => {
               <h2 className="text-xl font-semibold mb-4">Drafts ({draftSessions.length})</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {draftSessions.map((session) => (
-                  <SessionCard key={session.id} session={session} isOwner />
+                  <SessionCard 
+                    key={session.id} 
+                    session={session} 
+                    onEdit={handleEdit}
+                    onView={handleView}
+                  />
                 ))}
               </div>
             </div>
@@ -72,7 +85,12 @@ const MySessions = () => {
               <h2 className="text-xl font-semibold mb-4">Published ({publishedSessions.length})</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {publishedSessions.map((session) => (
-                  <SessionCard key={session.id} session={session} isOwner />
+                  <SessionCard 
+                    key={session.id} 
+                    session={session} 
+                    onEdit={handleEdit}
+                    onView={handleView}
+                  />
                 ))}
               </div>
             </div>

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { SessionCard } from '@/components/SessionCard';
 import { useSessions } from '@/hooks/useSessions';
@@ -17,6 +16,14 @@ const Dashboard = () => {
   useEffect(() => {
     fetchPublicSessions();
   }, []);
+
+  const handleEdit = (sessionId: string) => {
+    navigate(`/editor/${sessionId}`);
+  };
+
+  const handleView = (sessionId: string) => {
+    navigate(`/session/${sessionId}`);
+  };
 
   const stats = [
     {
@@ -38,6 +45,7 @@ const Dashboard = () => {
       description: "This month"
     }
   ];
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -128,7 +136,12 @@ const Dashboard = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sessions.map((session) => (
-            <SessionCard key={session.id} session={session} />
+            <SessionCard 
+              key={session.id} 
+              session={session} 
+              onEdit={handleEdit}
+              onView={handleView}
+            />
           ))}
         </div>
       )}
